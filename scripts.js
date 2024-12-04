@@ -28,7 +28,7 @@ async function getDb() {
 
 // Initialiser une seule fois
 async function init() {
-  if (window._initCompleted) return;
+  if (window._initCompleted) return; // Vérifie si l'initialisation est déjà faite
 
   try {
     showLoadingBar();
@@ -46,14 +46,15 @@ async function init() {
     }
 
     map = L.map('map', {
-      center: [31.6333, -8.0000],
-      zoom: 6,
+      center: [30.961, -8.413],
+      zoom: 11,
+      minZoom: 10,  
       maxBounds: [
-        [30.000, -9.000],
-        [37.000, -6.000],
+        [30.000, -11.000],
+        [37.000, -4.000],
       ],
       maxBoundsViscosity: 1.0,
-      zoomControl: true,
+      
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
@@ -62,7 +63,7 @@ async function init() {
     db = await getDb();
     conn = await db.connect();
 
-    updateLoadingBar(60); // Chargement des données GeoJSON
+    updateLoadingBar(50);
     const geoJSONData = await loadGeoJSON();
     const geoJSONData2 = await loadGeoJSON2();
     const geoJSONData3 = await loadGeoJSON3();
@@ -71,23 +72,38 @@ async function init() {
       geometry: JSON.stringify(feature.geometry),
       properties: JSON.stringify(feature.properties),
     }));
-
+    const features2 = geoJSONData2.features.map(feature => ({
+      geometry: JSON.stringify(feature.geometry),
+      properties: JSON.stringify(feature.properties),
+    }));
+    const features3 = geoJSONData3.features.map(feature => ({
+      geometry: JSON.stringify(feature.geometry),
+      properties: JSON.stringify(feature.properties),
+    }));
+    updateLoadingBar(70);
     await conn.query(`CREATE TABLE IF NOT EXISTS ptouche (geometry JSON, properties JSON);`);
     for (const feature of features) {
       await conn.query(`INSERT INTO ptouche VALUES ('${feature.geometry}', '${feature.properties}');`);
     }
 
-    updateLoadingBar(80); // Finalisation
-    window._initCompleted = true;
+    await conn.query(`CREATE TABLE IF NOT EXISTS surfanal (geometry JSON, properties JSON);`);
+    for (const feature of features2) {
+      await conn.query(`INSERT INTO surfanal VALUES ('${feature.geometry}', '${feature.properties}');`);
+    }
 
-    updateLoadingBar(100);
+    await conn.query(`CREATE TABLE IF NOT EXISTS epicentre (geometry JSON, properties JSON);`);
+    for (const feature of features3) {
+      await conn.query(`INSERT INTO epicentre VALUES ('${feature.geometry}', '${feature.properties}');`);
+    }
+    updateLoadingBar(80);
+    window._initCompleted = true; // Marque l'initialisation comme terminée
+    updateLoadingBar(90);
     setTimeout(hideLoadingBar, 500); // Cache la barre après un délai
   } catch (error) {
     console.error('Erreur lors de l\'initialisation:', error);
     hideLoadingBar();
   }
 }
-
 
 async function loadGeoJSON() {
   const response = await fetch('ptouche.geojson');
@@ -140,7 +156,7 @@ async function queryGeoJSON() {
     displayResultsOnMap(result.toArray());
   } catch (error) {
     console.error('Erreur:', error);
-    alert(`Erreur de requête : ${error.message}`);
+    
   }
 }
 
