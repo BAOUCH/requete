@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DuckDB-Wasm File Upload</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script type="module" src="scripts.js" defer></script>
+  <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+  <div id="map" style="height: 400px; "></div>
+  <div class="container">
+    <div class="AnalyseCommun">
+        <h3>Analyse par commune:</h3>
+        <div class="nbrpoint">
+            <label for="pointSlider">Ensemble de batiment :</label>
+            <input type="range" id="pointSlider" min="0" max="100" step="1">
+            <span id="limitDisplay">50%</span>
+        </div>
+        
+         <div class="ChoixCommune">
+            <label for="commune">Choisir une commune :</label>
+        <select id="commune">
+          <option value="ALL">Toutes les communes</option>
+          <option value="Aghbar">Aghbar</option>
+          <option value="Anougal">Anougal</option>
+          <option value="Azgour">Azgour</option>
+        </select>
+         </div>
+         <button id="updateMap">Mettre à jour la carte</button>
+        
+    </div>
+    <div class="AnalyseEpicentre">
+        <h3>Analyse par rapport au centre:</h3>
+        <label for="distanceInput">Distance (en mètres) :</label>
+        <input type="number" id="distanceInput" min="0" step="10">
+        <button id="updateMap1">Mettre à jour la carte</button>
+    </div>
+  </div>
+  
+</body>
+</html>

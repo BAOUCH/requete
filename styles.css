@@ -1,0 +1,81 @@
+body {
+    font-family: Arial, sans-serif;
+}
+/* Flex container for left and right columns */
+.container {
+    display: flex;
+    
+}
+/* Left column (1/3rd width) */
+.AnalyseCommun {
+    padding: 1rem;
+    flex: 1;
+    max-width: 50%;
+    border: solid #000;
+    border-width:  1px;
+    border-radius: 1rem;
+    margin: 4px;
+}
+/* Right column (2/3rd width) */
+.AnalyseEpicentre {
+    padding: 1rem;
+    flex: 1;
+    max-width: 50%;
+    border: solid #000;
+    border-width:  1px;
+    border-radius: 1rem;
+    margin: 4px;
+}
+
+.nbrpoint{
+    padding-bottom: 1rem;
+}
+
+.ChoixCommune{
+    padding-bottom: 1rem;
+}
+
+#updateMap{
+    float: right;
+    color: rgb(255, 255, 255);
+    background-color: rgb(68, 68, 68);
+    box-shadow: none;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+}
+
+
+#updateMap:hover{
+    background-color: rgb(43, 42, 42);
+}
+
+#updateMap1{
+    float: right;
+    color: rgb(255, 255, 255);
+    background-color: rgb(68, 68, 68);
+    box-shadow: none;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+}
+
+
+#updateMap1:hover{
+    background-color: rgb(43, 42, 42);
+}
+
+h3 {
+    margin-top: 0px;
+}
+
+#commune{
+    
+    
+    color: rgb(255, 255, 255);
+    background-color: rgb(68, 68, 68);
+    box-shadow: none;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+}
