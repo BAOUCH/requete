@@ -28,42 +28,46 @@ async function getDb() {
 
 // Initialiser une seule fois
 async function init() {
-  if (window._initCompleted) return; // Vérifie si l'initialisation est déjà faite
+  if (window._initCompleted) return;
 
   try {
+    showLoadingBar();
+    updateLoadingBar(10); // Démarrage
+
     const mapElement = document.getElementById('map');
     if (!mapElement) {
       console.error('L\'élément de la carte est introuvable.');
       return;
     }
 
-    // Vérifier si la carte a déjà été initialisée et la supprimer si nécessaire
+    updateLoadingBar(20); // Chargement de la carte
     if (map) {
-      map.remove(); // Supprime la carte existante
+      map.remove();
     }
 
-    // Initialiser la nouvelle carte
-    map = L.map('map').setView([30.961,-8.413], 8);
+    map = L.map('map', {
+      center: [31.6333, -8.0000],
+      zoom: 6,
+      maxBounds: [
+        [30.000, -9.000],
+        [37.000, -6.000],
+      ],
+      maxBoundsViscosity: 1.0,
+      zoomControl: true,
+    });
 
-    // Ajouter une couche de tuiles OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
+    updateLoadingBar(40); // Chargement de la base de données
     db = await getDb();
     conn = await db.connect();
 
+    updateLoadingBar(60); // Chargement des données GeoJSON
     const geoJSONData = await loadGeoJSON();
     const geoJSONData2 = await loadGeoJSON2();
     const geoJSONData3 = await loadGeoJSON3();
 
     const features = geoJSONData.features.map(feature => ({
-      geometry: JSON.stringify(feature.geometry),
-      properties: JSON.stringify(feature.properties),
-    }));
-    const features2 = geoJSONData2.features.map(feature => ({
-      geometry: JSON.stringify(feature.geometry),
-      properties: JSON.stringify(feature.properties),
-    }));
-    const features3 = geoJSONData3.features.map(feature => ({
       geometry: JSON.stringify(feature.geometry),
       properties: JSON.stringify(feature.properties),
     }));
@@ -73,21 +77,17 @@ async function init() {
       await conn.query(`INSERT INTO ptouche VALUES ('${feature.geometry}', '${feature.properties}');`);
     }
 
-    await conn.query(`CREATE TABLE IF NOT EXISTS surfanal (geometry JSON, properties JSON);`);
-    for (const feature of features2) {
-      await conn.query(`INSERT INTO surfanal VALUES ('${feature.geometry}', '${feature.properties}');`);
-    }
+    updateLoadingBar(80); // Finalisation
+    window._initCompleted = true;
 
-    await conn.query(`CREATE TABLE IF NOT EXISTS epicentre (geometry JSON, properties JSON);`);
-    for (const feature of features3) {
-      await conn.query(`INSERT INTO epicentre VALUES ('${feature.geometry}', '${feature.properties}');`);
-    }
-
-    window._initCompleted = true; // Marque l'initialisation comme terminée
+    updateLoadingBar(100);
+    setTimeout(hideLoadingBar, 500); // Cache la barre après un délai
   } catch (error) {
     console.error('Erreur lors de l\'initialisation:', error);
+    hideLoadingBar();
   }
 }
+
 
 async function loadGeoJSON() {
   const response = await fetch('ptouche.geojson');
@@ -220,6 +220,24 @@ async function queryGeoJSON1() {
   }
 }
 
+function addLegend() {
+  const legend = L.control({ position: 'bottomright' });
+
+  legend.onAdd = function () {
+    const div = L.DomUtil.create('div', 'legend');
+    div.innerHTML = `
+      <h4>Légende:</h4>
+      <i style="background: red"></i> Batiment inclus <br>
+      <i style="background: blue"></i> Batiment non inclus<br>
+      <i style="background: green; opacity: 0.5"></i> Cercle de recherche<br>
+      <img src="explosion.png" style="width:16px; height:16px; border:1px solid #000;"> Épicentre<br>
+      <img src="accueil.png" style="width:16px; height:16px; border:1px solid #000;"> Batiment<br>
+    `;
+    return div;
+  };
+
+  legend.addTo(map);
+}
 
 function displayResultsOnMap(data) {
   if (map) {
@@ -314,7 +332,10 @@ function displayResultsOnMap(data) {
 }
 
 // Initialisation unique
-init();
+init().then(() => {
+  countTotalPoints();
+  addLegend();
+});
 
 // Gestionnaire pour le bouton de mise à jour
 document.getElementById("updateMap").addEventListener("click", () => {
@@ -352,7 +373,20 @@ async function countTotalPoints() {
 }
 
 
+function showLoadingBar() {
+  const overlay = document.getElementById('loadingOverlay');
+  overlay.style.visibility = 'visible';
+}
 
+function hideLoadingBar() {
+  const overlay = document.getElementById('loadingOverlay');
+  overlay.style.visibility = 'hidden';
+}
+
+function updateLoadingBar(progress) {
+  const loadingBar = document.getElementById('loadingBar');
+  loadingBar.style.width = `${progress}%`;
+}
 
 
 
@@ -361,4 +395,3 @@ async function countTotalPoints() {
 
 
 // Appeler la fonction de comptage après l'initialisation
-init().then(countTotalPoints);

@@ -10,8 +10,20 @@
   <link href="styles.css" rel="stylesheet">
 </head>
 <body>
-  <div id="map" style="height: 400px; "></div>
+  <div class="global-container">
+    <div id="loadingOverlay">
+      <div id="loadingBarContainer">
+        <div id="loadingBar"></div>
+        <p id="loadingText">Chargement...</p>
+      </div>
+    </div>
+  <div id="map" style="height: 400px; ">
+    <div id="legend" class="legend"></div>
+  </div>
+  
+
   <div class="container">
+    
     <div class="AnalyseCommun">
         <h3>Analyse par commune:</h3>
         <div class="nbrpoint">
@@ -39,6 +51,6 @@
         <button id="updateMap1">Mettre à jour la carte</button>
     </div>
   </div>
-  
+</div>
 </body>
 </html>
